@@ -1,0 +1,18 @@
+
+UI:
+    face_box:
+        height: 0.4
+        face_ratio: 1.4
+face_detect:
+    face_confidence_threshold: 0.5
+
+flashing:
+    flashing_colors: ["white", "blue", "green", "red"]
+    flashing_interval: 0.5  # seconds
+data:
+    save_dir: ./data/
+
+face_check:
+    bbox_gap: [0.15, 0.5, 0.15, 0.1]
+    bbox_reset_gap: [0.22, 0.5, 0.22, 0.26]
+    bbox_thresh: 0.3
