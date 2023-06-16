@@ -3,12 +3,12 @@ import numpy as np
 import time
 from imutils.video import VideoStream
 import os
-from .ui import LivenessSdkUi
-from .inference import FaceDetect
-from .utils import square_crop_image, create_datetime_str
-from .options import options
-from .face_check import FaceChecker
-from .pad import PresentationAttackDetection
+from ui import LivenessSdkUi
+from inference import FaceDetect
+from utils import square_crop_image, create_datetime_str
+from options import options
+from face_check import FaceChecker
+from pad import PresentationAttackDetection
 import yaml
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +38,8 @@ class FlashingStatus:
         self.image_selected = False
         self.current_message = "Capturing Images: Keep still"
         self.status = "In_progress"
+        self.capture_face=True
+
 
     def update(self, frame: np.ndarray, fps=0, stage: int = 0):
         # stage 0: prepare
@@ -46,7 +48,7 @@ class FlashingStatus:
         # if passed prepare stage
         # changing the light
         # avrage fps
-        print("imge dict", self.image_dict.keys())
+        #print("imge dict", self.image_dict.keys())
         if stage == 0:
             self.fps_hist.append(fps)
         if stage == 1:
@@ -55,7 +57,7 @@ class FlashingStatus:
                 fps > 0.5 / self.flashing_interval
             ), f"current fps did not support the flashing interval {self.flashing_interval}"
             if (
-                time.time() - self.previous_time > self.flashing_interval
+                time.time() - self.previous_time > self.flashing_interval and self.image_selected==True
             ):  # change color
                 self.current_color_index += 1
                 if self.current_color_index >= len(self.flashing_colors):
@@ -67,7 +69,23 @@ class FlashingStatus:
                     self.image_selected = False
             if time.time() - self.previous_time > self.flashing_interval / 2:
                 if self.image_selected is False:  # if already take 1, skip it
-                    self.image_dict[self.current_color] = frame
+
+                    #save the whole picture
+                    if not self.capture_face:
+                        self.image_dict[self.current_color] = frame
+
+                    else:
+                    #save the face
+                        (h, w) = frame.shape[:2]
+                        numclass, facebox = face_detector(frame)
+                        (startX, startY, endX, endY) = facebox
+                        startX = max(0, startX)
+                        startY = max(0, startY)
+                        endX = min(w, endX)
+                        endY = min(h, endY)
+                        face = frame[startY:endY, startX:endX]
+                        self.image_dict[self.current_color] = face
+
                     self.image_selected = True
 
     def save(self) -> None:
@@ -120,10 +138,16 @@ def main():
         original_frame = frame.copy()
         frame = square_crop_image(frame)
         frame = cv2.flip(frame, 1)
+
+
+
+        (h, w) = frame.shape[:2]
+        #print(frame.shape)
+
+
         base_ui = LivenessSdkUi(frame, config["UI"])
 
         # face detect
-        (h, w) = frame.shape[:2]
         face_class, bbox = face_detector(frame)
         face_check_rst, reset_signal, valid_face, fps = face_check(
             face_class, bbox, base_ui.required_bbox, count
@@ -139,6 +163,9 @@ def main():
             if flashing_status.status == "In_progress"
             else "white"
         )
+
+
+
         frame = base_ui.update_face_status(
             frame,
             face_check_rst,
@@ -157,21 +184,36 @@ def main():
         if cv2.waitKey(1) & 0xFF == ord("r"):
             print("[INFO] new round")
             break
-        print("flashing_status.status", flashing_status.status)
+        #print("flashing_status.status", flashing_status.status)
         if flashing_status.status == "Done":
             video_stream.stop()
             break
 
-    is_attack = pad(flashing_status.image_dict)
-    flashing_status.save()
-    message = f"Attack: {is_attack}"
+
+    is_attack, re_captrue = pad(flashing_status.image_dict)
+
+
+
+    if re_captrue == True:
+        message = "Please Capture the face agian"
+    else:
+        message = f"Attack: {is_attack}"
+        flashing_status.save()
+
+    frame = square_crop_image(original_frame)
+
     frame = base_ui.update_face_status(
         frame,
         face_check_rst,
         fps=fps,
         prompt_message=message,
     )
+    cv2.destroyAllWindows()
+    cv2.namedWindow("Face Capture")
+
     cv2.imshow("Face Capture", frame)
+    cv2.waitKey(0)  # Wait for a key press (optional)
+
     input("press any key to exit")
 
 
