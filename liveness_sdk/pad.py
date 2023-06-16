@@ -39,18 +39,21 @@ class PresentationAttackDetection:
 
         count=0
 
-        if np.mean(g2)*np.mean(r2)<0.1:
+        print(np.mean(g2)+np.mean(r2))
+        print( np.mean(b3)+np.mean(r3))
+        print(np.mean(b4)+np.mean(g4))
+        if np.mean(g2)+np.mean(r2)<0.5:
             count+=1
 
-        if np.mean(b3)*np.mean(r3)<0.1:
+        if np.mean(b3)+np.mean(r3)<0.5:
             count+=1
 
-        if np.mean(b4)*np.mean(g4)<0.1:
+        if np.mean(b4)+np.mean(g4)<0.5:
             count+=1
 
         if count >=2 :
             return [False,False]
-        elif count==0:
+        elif count<=1:
             return [True,False]
         else:
             return [True,True]
