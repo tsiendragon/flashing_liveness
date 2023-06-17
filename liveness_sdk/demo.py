@@ -9,6 +9,8 @@ from utils import square_crop_image, create_datetime_str
 from options import options
 from face_check import FaceChecker
 from pad import PresentationAttackDetection
+from pad_svm import svm_PresentationAttackDetection
+
 import yaml
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +40,7 @@ class FlashingStatus:
         self.image_selected = False
         self.current_message = "Capturing Images: Keep still"
         self.status = "In_progress"
-        self.capture_face=True
+        self.capture_face=False
 
 
     def update(self, frame: np.ndarray, fps=0, stage: int = 0):
@@ -110,7 +112,7 @@ face_check = FaceChecker(config["face_check"])
 flashing_status = FlashingStatus(
     save_dir=config["data"]["save_dir"], **config["flashing"]
 )
-pad = PresentationAttackDetection()
+pad = svm_PresentationAttackDetection()
 video_stream = VideoStream(src=0).start()
 print("[INFO] loading face detector...")
 
@@ -189,7 +191,7 @@ def main():
             video_stream.stop()
             break
 
-
+    flashing_status.save()
     is_attack, re_captrue = pad(flashing_status.image_dict)
 
 
@@ -198,7 +200,6 @@ def main():
         message = "Please Capture the face agian"
     else:
         message = f"Attack: {is_attack}"
-        flashing_status.save()
 
     frame = square_crop_image(original_frame)
 

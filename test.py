@@ -72,7 +72,7 @@ np.savetxt('big_matrix.txt',w,fmt='%d',delimiter=' ')
 
 # Set the red and green channels to zero (keeping only the blue channel)
 zero_channel = np.zeros_like(b)
-blue_image = cv2.merge((zero_channel,z,x))
+blue_image = cv2.merge((zero_channel,zero_channel,x))
 
 black=np.zeros((224,224,3), dtype=np.uint8)
 white=black-1
