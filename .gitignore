@@ -72,7 +72,7 @@ docs/_build/
 docs/source/_build/
 docs/src/
 /docs/source/api/
-
+__MACOSX/
 # PyBuilder
 target/
 
@@ -159,3 +159,4 @@ docs/source/release_note/RELEASE_NOTE.md
 .mypy_cache
 runs
 nohup.out
+*.pyc
