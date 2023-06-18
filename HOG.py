@@ -31,7 +31,7 @@ nbins = 9  # Number of bins for HOG descriptor
 
 
 for j in range(2):
-    for k in range(8):
+    for k in range(11):
         folder=str(k)
         image = []
         gray_image = []
