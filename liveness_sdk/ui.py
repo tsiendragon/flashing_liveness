@@ -39,7 +39,9 @@ def lighten_color(color, amount=0.5):
 
 class LivenessSdkUi:
     def __init__(self, frame, config) -> None:
+
         frame_h, frame_w = frame.shape[:2]
+
         self.config = config
         self.frame_h = frame_h
         self.frame_w = frame_w
@@ -108,6 +110,19 @@ class LivenessSdkUi:
         elif not face_position_valid:
             color = self.colors["face_position_error"]
         frame = np.ascontiguousarray(frame, dtype=np.uint8)
+
+        mask = np.zeros((self.frame_h*2,self.frame_w*3,3), dtype=np.uint8)
+
+        half_h=self.frame_h//2
+        mask[half_h:half_h+self.frame_h,self.frame_w:2*self.frame_w]=frame
+
+        mask_h,mask_w=mask.shape[:2]
+        self.center_x = int(mask_w / 2)
+        self.center_y = int(mask_h / 2)
+
+        frame=mask
+
+
         frame = cv2.ellipse(
             frame,
             (self.center_x, self.center_y),
@@ -136,6 +151,7 @@ class LivenessSdkUi:
             frame = self.write_fps_message(frame, fps)
         position_message = message["face_position"]
         frame = self.write_face_position_message(frame, position_message, color)
+
         if prompt_message is not None:
             frame = self.write_prompt_message(frame, prompt_message)
         return frame
@@ -146,9 +162,9 @@ class LivenessSdkUi:
             position_message,
             self.face_position_message_loc,
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
+            0.7,
             color,
-            1,
+            2,
         )
         return frame
 
@@ -160,7 +176,7 @@ class LivenessSdkUi:
             message,
             self.fps_loc,
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
+            0.7,
             self.colors["fps"],
             1,
         )
@@ -174,7 +190,7 @@ class LivenessSdkUi:
             message,
             self.locations["speed"],
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
+            0.7,
             self.colors["speed"],
             1,
         )
@@ -186,7 +202,7 @@ class LivenessSdkUi:
             prompt_message,
             self.locations["prompt"],
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
+            1,
             self.colors["prompt"],
             2,
         )

@@ -8,11 +8,11 @@ face_detect:
 
 flashing:
     flashing_colors: ["white", "blue", "green", "red"]
-    flashing_interval: 0.5  # seconds
+    flashing_interval: 1  # seconds
 data:
     save_dir: ./data/
 
 face_check:
-    bbox_gap: [0.15, 0.5, 0.15, 0.1]
+    bbox_gap: [0.5, 0.5, 0.5, 0.5]
     bbox_reset_gap: [0.22, 0.5, 0.22, 0.26]
     bbox_thresh: 0.3
