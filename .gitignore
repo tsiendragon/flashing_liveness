@@ -12,7 +12,7 @@ pyvenv.cfg
 # C extensions
 *.so
 !src/utility/triton/plugins/libretinanet.so
-
+.DS_Store/*
 # Distribution / packaging
 .Python
 env/
