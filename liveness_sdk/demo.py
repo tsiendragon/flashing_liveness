@@ -112,7 +112,7 @@ face_check = FaceChecker(config["face_check"])
 flashing_status = FlashingStatus(
     save_dir=config["data"]["save_dir"], **config["flashing"]
 )
-pad = svm_PresentationAttackDetection()
+pad = PresentationAttackDetection()
 video_stream = VideoStream(src=0).start()
 print("[INFO] loading face detector...")
 
@@ -197,7 +197,7 @@ def main():
 
 
     if re_captrue == True:
-        message = "Please Capture the face agian"
+        message = "Please let your background be darker"
     else:
         message = f"Attack: {is_attack}"
 

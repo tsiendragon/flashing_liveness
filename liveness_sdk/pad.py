@@ -10,10 +10,10 @@ class PresentationAttackDetection:
         pass
 
 
-    def test_nose(self,cur_color,first_color,second_color,landmarks):
+    def test_point(self,cur_color,first_color,second_color,landmarks,x,y):
 
-        nose_x = landmarks.part(30).x
-        nose_y = landmarks.part(30).y
+        nose_x = landmarks.part(x).x
+        nose_y = landmarks.part(y).y
 
         # You can use the nose landmark as a reference to define the region
         nose_region_x = nose_x - 10  # Example: Subtracting 10 pixels from the nose x-coordinate
@@ -32,6 +32,53 @@ class PresentationAttackDetection:
             return True
 
 
+
+    def test_face_boundary(self,cur_color,first_color,second_color,landmarks):
+        left_x = landmarks.part(0).x
+        left_y = landmarks.part(0).y
+
+        # You can use the nose landmark as a reference to define the region
+        left_region_x = left_x - 10  # Example: Subtracting 10 pixels from the nose x-coordinate
+        left_region_y = left_y - 10  # Example: Subtracting 10 pixels from the nose y-coordinate
+        left_region_width = 20  # Example: Setting the region width to 20 pixels
+        left_region_height = 20  # Example: Setting the region height to 20 pixels
+
+        left_channel_1= cur_color[left_region_y:left_region_y + left_region_height,
+                      left_region_x:left_region_x + left_region_width]
+        left_channel_2= first_color[left_region_y:left_region_y + left_region_height,
+                      left_region_x:left_region_x + left_region_width]
+        left_channel_3= second_color[left_region_y:left_region_y + left_region_height,
+                      left_region_x:left_region_x + left_region_width]
+
+
+
+        right_x = landmarks.part(16).x
+        right_y = landmarks.part(16).y
+
+        # You can use the nose landmark as a reference to define the region
+        right_region_x = right_x - 10  # Example: Subtracting 10 pixels from the nose x-coordinate
+        right_region_y = right_y - 10  # Example: Subtracting 10 pixels from the nose y-coordinate
+        right_region_width = 20  # Example: Setting the region width to 20 pixels
+        right_region_height = 20  # Example: Setting the region height to 20 pixels
+
+        right_channel_1= cur_color[right_region_y:right_region_y + right_region_height,
+                      right_region_x:right_region_x + right_region_width]
+        right_channel_2= first_color[right_region_y:right_region_y + right_region_height,
+                      right_region_x:right_region_x + right_region_width]
+        right_channel_3= second_color[right_region_y:right_region_y + right_region_height,
+                      right_region_x:right_region_x + right_region_width]
+
+
+        if np.mean(left_channel_1)<np.mean(right_channel_1):
+            if np.mean(left_channel_2)<np.mean(right_channel_2) and np.mean(left_channel_3)<np.mean(right_channel_3):
+                return True
+            else:
+                return False
+        else:
+            if np.mean(left_channel_2)>np.mean(right_channel_2) and np.mean(left_channel_3)>np.mean(right_channel_3):
+                return True
+            else:
+                return False
 
     def test_eye(self,cur_color,first_color,second_color,landmarks):
 
@@ -97,9 +144,9 @@ class PresentationAttackDetection:
         b3, g3, r3 = cv2.split(image_dict["green"])
         b4, g4, r4 = cv2.split(image_dict["red"])
 
-        b2,g2,r2=b2-b,g2-g,r2-r
-        b3,g3,r3=b3-b,g3-g,r3-r
-        b4,g4,r4=b4-b,g4-g,r4-r
+        b2,g2,r2=b-b2,g-g2,r-r2
+        b3,g3,r3=b-b3,g-g3,r-r3
+        b4,g4,r4=b-b4,g-g4,r-r4
 
         b2,g2,r2=np.clip(b2,0,255),np.clip(g2,0,255),np.clip(r2,0,255)
         b3,g3,r3=np.clip(b3,0,255),np.clip(g3,0,255),np.clip(r3,0,255)
@@ -116,17 +163,21 @@ class PresentationAttackDetection:
         count=0
 
 
-        if self.test_nose(b2,g2,r2,landmarks) or self.test_eye(b2,g2,r2,landmarks):
+        if self.test_point(b2,g2,r2,landmarks,41,33) and self.test_point(b2,g2,r2,landmarks,45,33) and self.test_point(b2,g2,r2,landmarks,27,27):
             count+=1
 
-        if self.test_nose(g3,b3,r3,landmarks) or self.test_eye(g3,b3,r3,landmarks):
+        if self.test_point(g3,b3,r3,landmarks,41,33) and self.test_point(g3,b3,r3,landmarks,45,33) and self.test_point(g3,b3,r3,landmarks,27,27):
             count+=1
 
-        if self.test_nose(r4,b4,g4,landmarks) or self.test_eye(r4,b4,g4,landmarks):
+        if self.test_point(r4,b4,g4,landmarks,41,33) and self.test_point(r4,b4,g4,landmarks,45,33) and self.test_point(r4,b4,g4,landmarks,27,27):
+
             count+=1
 
-        if count >=2 :
+        if count ==3 :
             return [False,False]
-        else:
+        elif count<=1:
             return [True,False]
+        else:
+            return [True, True]
+
 
