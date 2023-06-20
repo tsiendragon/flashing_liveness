@@ -111,10 +111,13 @@ class LivenessSdkUi:
             color = self.colors["face_position_error"]
         frame = np.ascontiguousarray(frame, dtype=np.uint8)
 
-        mask = np.zeros((self.frame_h*2,self.frame_w*3,3), dtype=np.uint8)
+        mask = np.zeros((self.frame_h*3,self.frame_w*5,3), dtype=np.uint8)
 
         half_h=self.frame_h//2
-        mask[half_h:half_h+self.frame_h,self.frame_w:2*self.frame_w]=frame
+        half_w=self.frame_w//2
+
+        mask[self.frame_h:2*self.frame_h,2*self.frame_w
+:3*self.frame_w]=frame
 
         mask_h,mask_w=mask.shape[:2]
         self.center_x = int(mask_w / 2)
